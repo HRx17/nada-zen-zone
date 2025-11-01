@@ -60,6 +60,39 @@ const InputHub = ({ setLessonData, setIsLoading, setError }) => {
     }
   };
 
+  const handleDebugPdf = async () => {
+    if (!pdfFile) {
+      setError('Please select a PDF file to debug');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', pdfFile);
+
+      const response = await fetch('http://localhost:3001/api/debug-pdf', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Debug PDF failed');
+      }
+
+      // Show the debug result in the error area for now
+      setError(JSON.stringify(data, null, 2));
+    } catch (err) {
+      console.error('Debug PDF error:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <h1 className="text-4xl font-bold mb-8 text-center bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
@@ -163,14 +196,24 @@ const InputHub = ({ setLessonData, setIsLoading, setError }) => {
               className="flex-1 p-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-yellow-500 file:text-white file:cursor-pointer hover:file:bg-yellow-600"
               onChange={(e) => setPdfFile(e.target.files[0])}
             />
-            <button
-              type="button"
-              className="w-full md:w-auto bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold px-8 py-3 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              onClick={() => handleGenerateLesson("pdf", null)}
-              disabled={!pdfFile}
-            >
-              Analyze PDF
-            </button>
+            <div className="flex gap-3 w-full md:w-auto">
+              <button
+                type="button"
+                className="flex-1 md:flex-none bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold px-8 py-3 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                onClick={() => handleGenerateLesson("pdf", null)}
+                disabled={!pdfFile}
+              >
+                Analyze PDF
+              </button>
+              <button
+                type="button"
+                className="flex-1 md:flex-none bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-3 rounded-lg transition-all"
+                onClick={handleDebugPdf}
+                disabled={!pdfFile}
+              >
+                Debug PDF
+              </button>
+            </div>
           </div>
           {pdfFile && (
             <p className="mt-3 text-sm text-gray-400">Selected: {pdfFile.name}</p>
