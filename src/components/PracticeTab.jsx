@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const PracticeTab = ({ fullTextContext }) => {
   const [messages, setMessages] = useState([]);
@@ -85,32 +86,26 @@ const PracticeTab = ({ fullTextContext }) => {
 
     try {
       // Call Gemini Chat API
-      const chatResponse = await fetch('http://localhost:3001/api/chat-response', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ history: fullHistory, context: fullTextContext })
+      const { data: chatResult, error: chatError } = await supabase.functions.invoke('chat-response', {
+        body: { history: fullHistory, context: fullTextContext }
       });
       
-      if (!chatResponse.ok) {
-        throw new Error('Failed to get chat response');
-      }
+      if (chatError) throw chatError;
+      if (chatResult.error) throw new Error(chatResult.error);
       
-      const { text: tutorResponseText } = await chatResponse.json();
+      const tutorResponseText = chatResult.text;
       setMessages((prev) => [...prev, { sender: "tutor", text: tutorResponseText }]);
 
       // Call ElevenLabs API
-      const ttsResponse = await fetch('http://localhost:3001/api/text-to-speech', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: tutorResponseText })
+      const { data: ttsResult, error: ttsError } = await supabase.functions.invoke('text-to-speech', {
+        body: { text: tutorResponseText }
       });
       
-      if (!ttsResponse.ok) {
-        throw new Error('Failed to generate speech');
-      }
+      if (ttsError) throw ttsError;
+      if (ttsResult.error) throw new Error(ttsResult.error);
       
-      const audioBuffer = await ttsResponse.arrayBuffer();
-      await playAudio(audioBuffer);
+      // The result is already an ArrayBuffer from the edge function
+      await playAudio(ttsResult);
 
     } catch (error) {
       console.error("Error in chat interaction:", error);

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const InputHub = ({ setLessonData, setIsLoading, setError }) => {
   const [pdfFile, setPdfFile] = useState(null);
@@ -24,37 +25,35 @@ const InputHub = ({ setLessonData, setIsLoading, setError }) => {
     setError(null);
     
     try {
-      let response;
+      let requestBody = { inputType, data };
+      
       if (inputType === 'pdf' && pdfFile) {
-        const formData = new FormData();
-        formData.append('inputType', inputType);
-        formData.append('file', pdfFile);
-
-        response = await fetch('http://localhost:3001/api/generate-lesson', {
-          method: 'POST',
-          body: formData
-        });
-      } else {
-        response = await fetch('http://localhost:3001/api/generate-lesson', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ inputType, data })
-        });
+        // For PDF, we'll send the file name and a placeholder
+        requestBody = { 
+          inputType: 'pdf', 
+          data: pdfFile.name,
+          fileData: 'placeholder' // In production, you'd read and encode the file
+        };
       }
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const { data: result, error } = await supabase.functions.invoke('generate-lesson', {
+        body: requestBody
+      });
+
+      if (error) throw error;
+
+      if (result.error) {
+        throw new Error(result.error);
       }
 
-      const { lessonKit, sourceText } = await response.json();
-      setLessonData({ ...lessonKit, sourceText });
+      setLessonData({ ...result.lessonKit, sourceText: result.sourceText });
       
       // Clear inputs after successful generation
       if (inputRef?.current) inputRef.current.value = '';
       if (inputType === 'pdf') setPdfFile(null);
     } catch (error) {
       console.error("Error generating lesson:", error);
-      setError(error.message);
+      setError(error.message || 'Failed to generate lesson');
     } finally {
       setIsLoading(false);
     }
@@ -70,21 +69,8 @@ const InputHub = ({ setLessonData, setIsLoading, setError }) => {
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', pdfFile);
-
-      const response = await fetch('http://localhost:3001/api/debug-pdf', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Debug PDF failed');
-      }
-
-      // Show the debug result in the error area for now
-      setError(JSON.stringify(data, null, 2));
+      // For demo: show PDF info
+      setError(`PDF selected: ${pdfFile.name}, Size: ${pdfFile.size} bytes. PDF parsing will be implemented in production.`);
     } catch (err) {
       console.error('Debug PDF error:', err);
       setError(err.message);

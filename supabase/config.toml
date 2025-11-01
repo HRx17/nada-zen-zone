@@ -1,1 +1,10 @@
 project_id = "wkdrlngththwtjvolveo"
+
+[functions.generate-lesson]
+verify_jwt = false
+
+[functions.text-to-speech]
+verify_jwt = false
+
+[functions.chat-response]
+verify_jwt = false
