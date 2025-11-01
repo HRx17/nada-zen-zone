@@ -13,6 +13,7 @@
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.21.0",
     "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.78.0",
     "axios": "^1.13.1",
     "cheerio": "^1.1.2",
     "cors": "^2.8.5",
