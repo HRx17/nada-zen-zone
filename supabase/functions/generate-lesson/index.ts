@@ -15,10 +15,10 @@ serve(async (req) => {
     console.log('Processing request:', { inputType, hasData: !!data, hasFileData: !!fileData });
     
     let sourceText = "";
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY not configured');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
     // Handle different input types
@@ -68,7 +68,7 @@ serve(async (req) => {
         throw new Error('Invalid input type');
     }
 
-    const instruction = `You are "Lumi," an expert educator. Create a complete "Lesson Kit" as JSON with this structure:
+    const systemPrompt = `You are "Lumi," an expert educator. Create a complete "Lesson Kit" as JSON with this structure:
 {
   "title": "lesson title",
   "summary": "brief overview",
@@ -83,50 +83,58 @@ Guidelines:
 - For 'url'/'paste': base chapters on sections
 - Return ONLY valid JSON, no markdown`;
 
-    let prompt;
+    let userPrompt;
     if (inputType === "search") {
-      prompt = `Generate a comprehensive lesson kit about: ${data}`;
+      userPrompt = `Generate a comprehensive lesson kit about: ${data}`;
     } else {
-      prompt = `Generate a lesson kit from this content:\n\n${sourceText.slice(0, 5000)}`;
+      userPrompt = `Generate a lesson kit from this content:\n\n${sourceText.slice(0, 5000)}`;
     }
 
-    const fullPrompt = `${instruction}\n\n${prompt}`;
-
-    console.log('Calling Gemini API...');
+    console.log('Calling Lovable AI Gateway...');
     
-    // Call Gemini API directly
-    const apiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: fullPrompt
-            }]
-          }]
-        }),
-      }
-    );
+    // Call Lovable AI Gateway
+    const apiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+      }),
+    });
 
     if (!apiResponse.ok) {
+      if (apiResponse.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (apiResponse.status === 402) {
+        return new Response(JSON.stringify({ error: "Payment required, please add credits to your workspace." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const errorText = await apiResponse.text();
-      console.error('Gemini API error:', errorText);
-      throw new Error(`Gemini API error: ${apiResponse.status}`);
+      console.error('AI Gateway error:', apiResponse.status, errorText);
+      throw new Error(`AI Gateway error: ${apiResponse.status}`);
     }
 
     const apiResult = await apiResponse.json();
-    const rawText = apiResult?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const rawText = apiResult?.choices?.[0]?.message?.content;
     
     if (!rawText) {
-      console.error('Empty response from Gemini');
+      console.error('Empty response from AI Gateway');
       throw new Error('Empty response from AI');
     }
 
-    console.log('Gemini response:', rawText.slice(0, 200));
+    console.log('AI response received:', rawText.slice(0, 200));
 
     // Extract JSON from response (might be wrapped in markdown code blocks)
     let jsonText = rawText.trim();
