@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Mic, MicOff, Send } from "lucide-react";
+import { Mic, MicOff, Send, Bot, User } from "lucide-react";
 
 const TutorMode = ({ lessonData }) => {
   const [messages, setMessages] = useState([]);
@@ -13,7 +13,6 @@ const TutorMode = ({ lessonData }) => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    // Initialize Speech Recognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognitionInstance = new SpeechRecognition();
@@ -38,16 +37,14 @@ const TutorMode = ({ lessonData }) => {
       setRecognition(recognitionInstance);
     }
 
-    // Initialize Audio Context
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (AudioContextClass) {
       setAudioContext(new AudioContextClass());
     }
 
-    // Add initial greeting
     setMessages([{
       sender: "tutor",
-      text: "Hi! I'm Lumi, your AI tutor. I'm here to help you understand this lesson better. Feel free to ask me any questions!"
+      text: "Hi! I'm Lumi, your AI tutor. I'm here to help you master this lesson. Feel free to ask me anything!"
     }]);
   }, []);
 
@@ -100,7 +97,6 @@ const TutorMode = ({ lessonData }) => {
     setIsTutorSpeaking(true);
 
     try {
-      // Call Gemini Chat API
       const { data: chatResult, error: chatError } = await supabase.functions.invoke('chat-response', {
         body: { history: fullHistory, context: lessonData.sourceText }
       });
@@ -111,7 +107,6 @@ const TutorMode = ({ lessonData }) => {
       const tutorResponseText = chatResult.text;
       setMessages((prev) => [...prev, { sender: "tutor", text: tutorResponseText }]);
 
-      // Call ElevenLabs API
       const { data: ttsResult, error: ttsError } = await supabase.functions.invoke('text-to-speech', {
         body: { text: tutorResponseText }
       });
@@ -164,33 +159,55 @@ const TutorMode = ({ lessonData }) => {
   return (
     <div className="flex flex-col h-[calc(100vh-280px)]">
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-card rounded-t-xl material-elevation-2 border border-b-0 border-border">
+      <div className="flex-1 overflow-y-auto p-8 space-y-6 glass rounded-t-3xl elevation-2 border border-b-0 border-border/50">
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} animate-in fade-in duration-300`}
+            className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} animate-in fade-in duration-500`}
           >
-            <div
-              className={`max-w-[75%] p-4 rounded-2xl material-elevation-1 ${
+            <div className={`flex items-start space-x-3 max-w-[80%] ${msg.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
+              {/* Avatar */}
+              <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center elevation-1 ${
                 msg.sender === "user"
-                  ? "bg-primary text-primary-foreground rounded-br-sm"
-                  : "bg-muted text-foreground rounded-bl-sm"
-              }`}
-            >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                  ? "bg-gradient-to-br from-primary to-primary-glow"
+                  : "bg-gradient-to-br from-accent to-accent"
+              }`}>
+                {msg.sender === "user" ? (
+                  <User className="w-5 h-5 text-white" />
+                ) : (
+                  <Bot className="w-5 h-5 text-white" />
+                )}
+              </div>
+              
+              {/* Message Bubble */}
+              <div
+                className={`px-6 py-4 rounded-2xl elevation-1 ${
+                  msg.sender === "user"
+                    ? "bg-gradient-to-br from-primary to-primary-glow text-white rounded-tr-sm"
+                    : "glass border border-border/50 text-foreground rounded-tl-sm"
+                }`}
+              >
+                <p className="text-base leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+              </div>
             </div>
           </div>
         ))}
+        
         {isTutorSpeaking && !isSending && (
-          <div className="flex justify-start animate-in fade-in duration-300">
-            <div className="bg-muted text-foreground p-4 rounded-2xl rounded-bl-sm material-elevation-1">
-              <div className="flex items-center space-x-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                  <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                  <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+          <div className="flex justify-start animate-in fade-in duration-500">
+            <div className="flex items-start space-x-3 max-w-[80%]">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent flex items-center justify-center elevation-1">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div className="glass border border-border/50 px-6 py-4 rounded-2xl rounded-tl-sm elevation-1">
+                <div className="flex items-center space-x-2">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                    <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                    <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                  </div>
+                  <p className="text-sm italic text-muted-foreground">Speaking...</p>
                 </div>
-                <p className="text-sm italic">Lumi is speaking...</p>
               </div>
             </div>
           </div>
@@ -199,22 +216,22 @@ const TutorMode = ({ lessonData }) => {
       </div>
 
       {/* Input Area */}
-      <div className="bg-card p-6 rounded-b-xl material-elevation-2 border border-t-0 border-border">
+      <div className="glass p-6 rounded-b-3xl elevation-2 border border-t-0 border-border/50">
         <div className="flex items-end space-x-3">
           <button
             onClick={handleMicClick}
             disabled={isTutorSpeaking || isSending}
-            className={`flex-shrink-0 p-4 rounded-xl transition-all material-elevation-1 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`flex-shrink-0 p-4 rounded-xl transition-all elevation-1 disabled:opacity-50 disabled:cursor-not-allowed ${
               isListening
-                ? "bg-destructive text-destructive-foreground animate-pulse"
-                : "bg-secondary hover:bg-secondary-hover text-secondary-foreground hover:scale-105"
+                ? "bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse glow"
+                : "bg-gradient-to-r from-secondary to-secondary text-white hover:scale-110"
             }`}
             title={isListening ? "Stop recording" : "Start voice input"}
           >
             {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
           </button>
 
-          <div className="flex-1 bg-muted rounded-xl border border-border focus-within:border-primary transition-colors">
+          <div className="flex-1 glass rounded-xl border border-border/50 focus-within:border-primary focus-within:glow transition-all">
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -229,15 +246,15 @@ const TutorMode = ({ lessonData }) => {
           <button
             onClick={handleSendClick}
             disabled={!inputText.trim() || isTutorSpeaking || isSending}
-            className="flex-shrink-0 p-4 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground transition-all material-elevation-1 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="flex-shrink-0 p-4 rounded-xl bg-gradient-to-r from-primary to-primary-glow text-white transition-all elevation-1 hover:scale-110 hover:glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             title="Send message"
           >
             <Send className="w-6 h-6" />
           </button>
         </div>
 
-        <p className="text-xs text-muted-foreground mt-3 text-center">
-          {isListening ? "🎤 Listening... Speak now" : isTutorSpeaking ? "⏳ Please wait for Lumi to respond" : "💡 Tip: Press Enter to send, Shift+Enter for new line"}
+        <p className="text-xs text-muted-foreground mt-4 text-center">
+          {isListening ? "🎤 Listening... Speak now" : isTutorSpeaking ? "⏳ Waiting for Lumi..." : "💡 Press Enter to send, Shift+Enter for new line"}
         </p>
       </div>
     </div>

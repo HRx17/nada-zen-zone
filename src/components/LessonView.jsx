@@ -21,22 +21,24 @@ const LessonView = ({ lessonData, setLessonData }) => {
     <div className="container mx-auto p-6 max-w-7xl">
       <button
         onClick={handleBack}
-        className="bg-card hover:bg-muted text-foreground font-medium px-6 py-3 rounded-lg mb-6 transition-all material-elevation-2 hover:scale-105 flex items-center space-x-2 border border-border"
+        className="group glass px-6 py-3 rounded-2xl mb-8 transition-all duration-300 hover:scale-105 flex items-center space-x-3 border border-border/50 hover:border-primary elevation-1 hover:elevation-2"
       >
-        <ArrowLeft className="w-5 h-5" />
-        <span>{selectedMode ? "Back to Modes" : "Back to Home"}</span>
+        <ArrowLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+        <span className="font-semibold text-foreground">{selectedMode ? "Back to Modes" : "Back to Home"}</span>
       </button>
 
-      {!selectedMode ? (
-        <LearningModeSelector onSelectMode={setSelectedMode} lessonData={lessonData} />
-      ) : (
-        <div>
-          {selectedMode === "learn" && <LearnMode lessonData={lessonData} />}
-          {selectedMode === "quiz" && <QuizMode lessonData={lessonData} />}
-          {selectedMode === "flashcards" && <FlashcardsMode lessonData={lessonData} />}
-          {selectedMode === "tutor" && <TutorMode lessonData={lessonData} />}
-        </div>
-      )}
+      <div className="animate-in fade-in duration-500">
+        {!selectedMode ? (
+          <LearningModeSelector onSelectMode={setSelectedMode} lessonData={lessonData} />
+        ) : (
+          <div>
+            {selectedMode === "learn" && <LearnMode lessonData={lessonData} />}
+            {selectedMode === "quiz" && <QuizMode lessonData={lessonData} />}
+            {selectedMode === "flashcards" && <FlashcardsMode lessonData={lessonData} />}
+            {selectedMode === "tutor" && <TutorMode lessonData={lessonData} />}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

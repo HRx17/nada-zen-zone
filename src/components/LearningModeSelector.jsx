@@ -1,5 +1,5 @@
 import React from "react";
-import { BookOpen, Brain, Layers, MessageSquare } from "lucide-react";
+import { BookOpen, Brain, Layers, MessageSquare, Sparkles } from "lucide-react";
 
 const LearningModeSelector = ({ onSelectMode, lessonData }) => {
   const modes = [
