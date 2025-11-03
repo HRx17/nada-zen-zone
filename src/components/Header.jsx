@@ -1,16 +1,21 @@
 import React from "react";
+import { Lightbulb } from "lucide-react";
 
 const Header = () => {
   return (
-    <header className="bg-gradient-to-r from-gray-800 to-gray-900 text-white p-6 shadow-lg border-b border-gray-700">
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center">
-          <span className="text-4xl mr-3">💡</span>
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Lumi
-            </h1>
-            <p className="text-sm text-gray-400">Your AI Learning Companion</p>
+    <header className="bg-card border-b border-border material-elevation-1 sticky top-0 z-50 backdrop-blur-sm bg-card/95">
+      <div className="container mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="bg-primary/10 p-2.5 rounded-xl">
+              <Lightbulb className="w-7 h-7 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                Lumi
+              </h1>
+              <p className="text-xs text-muted-foreground">AI Learning Companion</p>
+            </div>
           </div>
         </div>
       </div>

@@ -10,16 +10,16 @@ function App() {
   const [error, setError] = useState(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+    <div className="min-h-screen bg-background dark">
       <Header />
       {isLoading && <LoadingSpinner />}
       {error && (
         <div className="container mx-auto p-4 max-w-2xl">
-          <div className="bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
-            <p className="text-red-200">⚠️ Error: {error}</p>
+          <div className="bg-destructive/10 border border-destructive rounded-lg p-4 mb-4 material-elevation-2">
+            <p className="text-destructive-foreground">⚠️ Error: {error}</p>
             <button
               onClick={() => setError(null)}
-              className="mt-2 text-sm text-red-300 underline hover:text-red-100"
+              className="mt-2 text-sm text-destructive underline hover:text-destructive/80"
             >
               Dismiss
             </button>
