@@ -46,9 +46,9 @@ Rules:
 
     console.log('Processing chat with', history.length, 'messages');
     
-    // Call Gemini API directly
+    // Call Gemini API directly with Gemini 2.5 Flash
     const apiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: {
