@@ -56,8 +56,8 @@ const QuizMode = ({ lessonData }) => {
 
   if (quiz.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-2xl p-12 elevation-2 text-center">
-        <p className="text-lg text-muted-foreground">No quiz questions available for this lesson.</p>
+      <div className="bg-card border border-border rounded-xl p-8 elevation-1 text-center">
+        <p className="text-base text-muted-foreground">No quiz questions available for this lesson.</p>
       </div>
     );
   }
@@ -144,18 +144,18 @@ const QuizMode = ({ lessonData }) => {
   const progress = ((currentQuestion + 1) / quiz.length) * 100;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Progress Bar */}
-      <div className="bg-card border border-border rounded-xl p-6 elevation-2">
+      <div className="bg-card border border-border rounded-xl p-5 elevation-1">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-bold text-muted-foreground">
+          <span className="text-xs font-bold text-muted-foreground">
             Question {currentQuestion + 1} of {quiz.length}
           </span>
-          <span className="text-sm font-bold text-primary">
+          <span className="text-xs font-bold text-primary">
             Score: {score}/{quiz.length}
           </span>
         </div>
-        <div className="relative w-full bg-muted rounded-full h-3 overflow-hidden">
+        <div className="relative w-full bg-muted rounded-full h-2 overflow-hidden">
           <div
             className="absolute inset-y-0 left-0 bg-primary rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
@@ -168,12 +168,12 @@ const QuizMode = ({ lessonData }) => {
       </div>
 
       {/* Question Card */}
-      <div className="bg-card border border-border rounded-2xl p-8 sm:p-10 elevation-2">
-        <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8 leading-tight">
+      <div className="bg-card border border-border rounded-xl p-6 elevation-1">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6 leading-tight">
           {question.question}
         </h2>
 
-        <div className="space-y-4" role="radiogroup" aria-label="Answer options">
+        <div className="space-y-3" role="radiogroup" aria-label="Answer options">
           {question.options?.map((option, index) => {
             const isSelected = selectedAnswer === option;
             const isCorrect = option === question.answer;
@@ -185,7 +185,7 @@ const QuizMode = ({ lessonData }) => {
                 key={index}
                 onClick={() => handleAnswerSelect(option)}
                 disabled={showResult}
-                className={`w-full p-5 rounded-xl text-left transition-all duration-200 border-2 ${
+                className={`w-full p-4 rounded-lg text-left transition-all duration-200 border ${
                   showCorrectAnswer
                     ? "bg-success/10 border-success text-foreground"
                     : showWrongAnswer
@@ -199,12 +199,12 @@ const QuizMode = ({ lessonData }) => {
                 aria-label={option}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-base pr-4">{option}</span>
+                  <span className="font-semibold text-sm pr-3">{option}</span>
                   {showResult && isCorrect && (
-                    <CheckCircle2 className="w-6 h-6 text-success flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
                   )}
                   {showResult && isSelected && !isCorrect && (
-                    <XCircle className="w-6 h-6 text-destructive flex-shrink-0" />
+                    <XCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                   )}
                 </div>
               </button>
@@ -213,12 +213,12 @@ const QuizMode = ({ lessonData }) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-8 flex items-center justify-end">
+        <div className="mt-6 flex items-center justify-end">
           {!showResult ? (
             <button
               onClick={handleSubmitAnswer}
               disabled={!selectedAnswer}
-              className="bg-primary hover:bg-primary-hover text-white font-bold px-8 py-3 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 elevation-1"
+              className="bg-primary hover:bg-primary-hover text-white font-bold px-6 py-2.5 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm"
               aria-label="Submit answer"
             >
               Submit Answer
@@ -226,7 +226,7 @@ const QuizMode = ({ lessonData }) => {
           ) : (
             <button
               onClick={handleNextQuestion}
-              className="bg-primary hover:bg-primary-hover text-white font-bold px-8 py-3 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 elevation-1"
+              className="bg-primary hover:bg-primary-hover text-white font-bold px-6 py-2.5 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 text-sm"
               aria-label={currentQuestion < quiz.length - 1 ? "Next question" : "Finish quiz"}
             >
               {currentQuestion < quiz.length - 1 ? "Next Question" : "Finish Quiz"}

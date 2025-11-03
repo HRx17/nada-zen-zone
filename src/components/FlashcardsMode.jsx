@@ -53,18 +53,18 @@ const FlashcardsMode = ({ lessonData }) => {
   const progress = Math.round((studiedCards.size / cards.length) * 100);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Progress Section */}
-      <div className="bg-card border border-border rounded-xl p-6 elevation-2">
+      <div className="bg-card border border-border rounded-xl p-5 elevation-1">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-bold text-muted-foreground">
+          <span className="text-xs font-bold text-muted-foreground">
             Card {currentCard + 1} of {cards.length}
           </span>
-          <span className="text-sm font-bold text-accent">
+          <span className="text-xs font-bold text-accent">
             Studied: {studiedCards.size}/{cards.length} ({progress}%)
           </span>
         </div>
-        <div className="relative w-full bg-muted rounded-full h-3 overflow-hidden">
+        <div className="relative w-full bg-muted rounded-full h-2 overflow-hidden">
           <div
             className="absolute inset-y-0 left-0 bg-accent rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
@@ -77,7 +77,7 @@ const FlashcardsMode = ({ lessonData }) => {
       </div>
 
       {/* Flashcard */}
-      <div className="relative h-[420px] perspective-1000">
+      <div className="relative h-[380px] perspective-1000">
         <div
           onClick={handleFlip}
           className={`absolute inset-0 cursor-pointer transition-all duration-700 transform-style-3d ${
@@ -90,29 +90,29 @@ const FlashcardsMode = ({ lessonData }) => {
         >
           {/* Front of Card (Term) */}
           <div className={`absolute inset-0 backface-hidden transition-opacity duration-300 ${isFlipped ? "opacity-0" : "opacity-100"}`}>
-            <div className="bg-card border border-border rounded-2xl p-12 h-full elevation-3 flex flex-col items-center justify-center text-center hover:border-primary transition-all duration-200">
-              <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-accent/10 mb-6">
-                <FlipHorizontal className="w-4 h-4 text-accent" />
-                <span className="text-sm font-bold text-accent uppercase tracking-wide">TERM</span>
+            <div className="bg-card border border-border rounded-xl p-10 h-full elevation-2 flex flex-col items-center justify-center text-center hover:border-primary transition-all duration-200">
+              <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-accent/10 mb-5">
+                <FlipHorizontal className="w-3.5 h-3.5 text-accent" />
+                <span className="text-[10px] font-bold text-accent uppercase tracking-wider">TERM</span>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-foreground mb-8 leading-tight">
+              <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-6 leading-tight">
                 {cards[currentCard].term}
               </h2>
-              <p className="text-muted-foreground text-base">Click to reveal definition</p>
+              <p className="text-muted-foreground text-sm">Click to reveal definition</p>
             </div>
           </div>
 
           {/* Back of Card (Definition) */}
           <div className={`absolute inset-0 backface-hidden rotate-y-180 transition-opacity duration-300 ${isFlipped ? "opacity-100" : "opacity-0"}`}>
-            <div className="bg-primary/5 border-2 border-primary rounded-2xl p-12 h-full elevation-3 flex flex-col items-center justify-center text-center">
-              <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-primary/10 mb-6">
-                <FlipHorizontal className="w-4 h-4 text-primary" />
-                <span className="text-sm font-bold text-primary uppercase tracking-wide">DEFINITION</span>
+            <div className="bg-primary/5 border-2 border-primary rounded-xl p-10 h-full elevation-2 flex flex-col items-center justify-center text-center">
+              <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-primary/10 mb-5">
+                <FlipHorizontal className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">DEFINITION</span>
               </div>
-              <p className="text-xl sm:text-2xl text-foreground leading-relaxed font-medium max-w-2xl mb-8">
+              <p className="text-lg sm:text-xl text-foreground leading-relaxed font-medium max-w-xl mb-6">
                 {cards[currentCard].definition}
               </p>
-              <p className="text-muted-foreground text-base">Click to see term</p>
+              <p className="text-muted-foreground text-sm">Click to see term</p>
             </div>
           </div>
         </div>
