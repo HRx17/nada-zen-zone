@@ -1,16 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, FileText, Link as LinkIcon, Youtube, Upload, Sparkles } from "lucide-react";
+import { Search, Youtube, Upload, Sparkles, BookOpen, Brain, Layers, FileText, X } from "lucide-react";
 
 const InputHub = ({ setLessonData, setIsLoading, setError }) => {
+  const [activeTab, setActiveTab] = useState('search');
   const [searchQuery, setSearchQuery] = useState("");
-  const [pasteText, setPasteText] = useState("");
-  const [urlInput, setUrlInput] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [file, setFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  const handleSearchSubmit = async () => {
     if (!searchQuery.trim()) {
       setError("Please enter a search query");
       return;
@@ -37,64 +36,7 @@ const InputHub = ({ setLessonData, setIsLoading, setError }) => {
     }
   };
 
-  const handlePasteText = async (e) => {
-    e.preventDefault();
-    if (!pasteText.trim()) {
-      setError("Please paste some text content");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-lesson', {
-        body: { query: pasteText, sourceType: 'text' }
-      });
-
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
-
-      setLessonData(data);
-      setPasteText("");
-    } catch (err) {
-      console.error("Error generating lesson:", err);
-      setError(err.message || "Failed to generate lesson. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUrlSubmit = async (e) => {
-    e.preventDefault();
-    if (!urlInput.trim()) {
-      setError("Please enter a valid URL");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-lesson', {
-        body: { query: urlInput, sourceType: 'url' }
-      });
-
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
-
-      setLessonData(data);
-      setUrlInput("");
-    } catch (err) {
-      console.error("Error processing URL:", err);
-      setError(err.message || "Failed to process URL. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleYoutubeSubmit = async (e) => {
-    e.preventDefault();
+  const handleYouTubeSubmit = async () => {
     if (!youtubeUrl.trim()) {
       setError("Please enter a YouTube URL");
       return;
@@ -121,9 +63,14 @@ const InputHub = ({ setLessonData, setIsLoading, setError }) => {
     }
   };
 
-  const handleFileUpload = async (e) => {
-    e.preventDefault();
-    if (!file) {
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleFileSubmit = async () => {
+    if (!selectedFile) {
       setError("Please select a file to upload");
       return;
     }
@@ -133,7 +80,7 @@ const InputHub = ({ setLessonData, setIsLoading, setError }) => {
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', selectedFile);
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-lesson`, {
         method: 'POST',
@@ -152,7 +99,7 @@ const InputHub = ({ setLessonData, setIsLoading, setError }) => {
       if (data.error) throw new Error(data.error);
 
       setLessonData(data);
-      setFile(null);
+      setSelectedFile(null);
     } catch (err) {
       console.error("Error processing file:", err);
       setError(err.message || "Failed to process file. Please try again.");
@@ -161,193 +108,180 @@ const InputHub = ({ setLessonData, setIsLoading, setError }) => {
     }
   };
 
-  const inputCards = [
-    {
-      id: "search",
-      title: "Search & Learn",
-      subtitle: "Research any topic",
-      icon: Search,
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
-      buttonBg: "bg-primary hover:bg-primary-hover",
-      buttonText: "Generate from Search",
-      placeholder: "What do you want to learn about?",
-      value: searchQuery,
-      onChange: (e) => setSearchQuery(e.target.value),
-      onSubmit: handleSearch,
-      inputType: "input"
-    },
-    {
-      id: "paste",
-      title: "Paste Content",
-      subtitle: "From notes or articles",
-      icon: FileText,
-      iconBg: "bg-secondary/10",
-      iconColor: "text-secondary",
-      buttonBg: "bg-secondary hover:bg-secondary-hover",
-      buttonText: "Generate from Text",
-      placeholder: "Paste your text here...",
-      value: pasteText,
-      onChange: (e) => setPasteText(e.target.value),
-      onSubmit: handlePasteText,
-      inputType: "textarea"
-    },
-    {
-      id: "url",
-      title: "From URL",
-      subtitle: "Web articles & blogs",
-      icon: LinkIcon,
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
-      buttonBg: "bg-primary hover:bg-primary-hover",
-      buttonText: "Generate from URL",
-      placeholder: "https://example.com/article",
-      value: urlInput,
-      onChange: (e) => setUrlInput(e.target.value),
-      onSubmit: handleUrlSubmit,
-      inputType: "input"
-    },
-    {
-      id: "youtube",
-      title: "YouTube Video",
-      subtitle: "Learn from videos",
-      icon: Youtube,
-      iconBg: "bg-secondary/10",
-      iconColor: "text-secondary",
-      buttonBg: "bg-secondary hover:bg-secondary-hover",
-      buttonText: "Generate from YouTube",
-      placeholder: "https://youtube.com/watch?v=...",
-      value: youtubeUrl,
-      onChange: (e) => setYoutubeUrl(e.target.value),
-      onSubmit: handleYoutubeSubmit,
-      inputType: "input"
-    }
-  ];
-
   return (
-    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 sm:px-6 py-8">
-      <div className="w-full max-w-6xl mx-auto">
-        {/* Hero Section */}
-        <div className="text-center mb-10 max-w-3xl mx-auto">
-          <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-primary/10 mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-semibold text-primary uppercase tracking-wide">Powered by AI</span>
-          </div>
-          
-          <h1 className="text-4xl sm:text-5xl font-black mb-3 leading-tight">
-            <span className="text-primary">Transform Any Content</span>
-            <br />
-            <span className="text-foreground">Into Learning Magic</span>
-          </h1>
-          
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Choose your source, and Lumi will create a complete lesson kit with chapters, flashcards, and quizzes
-          </p>
+    <div className="min-h-[calc(100vh-64px)] py-12 px-4">
+      {/* Hero Section */}
+      <div className="max-w-2xl mx-auto text-center mb-12">
+        <div className="inline-flex items-center space-x-2 px-3 py-1.5 bg-primary/10 rounded-full mb-5">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <span className="text-xs font-bold text-primary uppercase tracking-wide">Powered by AI</span>
         </div>
-
-        {/* Input Cards Grid */}
-        <div className="grid sm:grid-cols-2 gap-5 mb-6">
-        {inputCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <form 
-              key={card.id} 
-              onSubmit={card.onSubmit}
-              className="bg-card border border-border rounded-xl p-5 elevation-1 hover:elevation-2 transition-all duration-200"
-            >
-              {/* Header */}
-              <div className="flex items-center space-x-3 mb-4">
-                <div className={`${card.iconBg} p-2.5 rounded-lg flex-shrink-0`}>
-                  <Icon className={`w-5 h-5 ${card.iconColor}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-foreground leading-tight">
-                    {card.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {card.subtitle}
-                  </p>
-                </div>
-              </div>
-
-              {/* Input Field */}
-              {card.inputType === "textarea" ? (
-                <textarea
-                  value={card.value}
-                  onChange={card.onChange}
-                  placeholder={card.placeholder}
-                  rows={3}
-                  className="w-full px-3 py-2.5 bg-muted border border-input rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none mb-3 transition-all"
-                  aria-label={card.title}
-                />
-              ) : (
-                <input
-                  type="text"
-                  value={card.value}
-                  onChange={card.onChange}
-                  placeholder={card.placeholder}
-                  className="w-full px-3 py-2.5 bg-muted border border-input rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent mb-3 transition-all"
-                  aria-label={card.title}
-                />
-              )}
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={!card.value.trim()}
-                className={`w-full ${card.buttonBg} text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100`}
-                aria-label={card.buttonText}
-              >
-                {card.buttonText}
-              </button>
-            </form>
-          );
-        })}
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground mb-4 leading-tight">
+          Transform Content Into<br />Learning Magic ✨
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed">
+          Choose your source, and Lumi creates complete lessons with chapters, flashcards, and quizzes
+        </p>
       </div>
 
-        {/* File Upload Section */}
-        <form onSubmit={handleFileUpload} className="bg-card border border-border rounded-xl p-5 elevation-1 hover:elevation-2 transition-all duration-200">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="bg-primary/10 p-2.5 rounded-lg">
-              <Upload className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-base font-bold text-foreground leading-tight">Upload Document</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">PDF, DOC, DOCX, or TXT files</p>
-            </div>
+      {/* Input Methods */}
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-card border-2 border-border rounded-2xl p-6 elevation-2">
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6 p-1 bg-muted rounded-xl">
+            {[
+              { id: 'search', icon: Search, label: 'Search Topic' },
+              { id: 'youtube', icon: Youtube, label: 'YouTube Link' },
+              { id: 'upload', icon: Upload, label: 'Upload File' }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-card text-foreground elevation-1'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  aria-label={tab.label}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx,.txt"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="hidden"
-              id="file-upload"
-              aria-label="Upload file"
-            />
-            
-          <label
-            htmlFor="file-upload"
-            className="flex items-center justify-center w-full py-8 bg-muted border border-dashed border-border rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-all duration-200 mb-3"
-          >
-            <div className="text-center">
-              <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm font-semibold text-foreground">
-                {file ? file.name : "Click to upload"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">Max 20MB</p>
+          {/* Search Tab */}
+          {activeTab === 'search' && (
+            <div className="space-y-5 animate-in fade-in duration-300">
+              <div>
+                <label className="flex items-center space-x-2 text-sm font-semibold text-foreground mb-3">
+                  <Search className="w-4 h-4 text-primary" />
+                  <span>What would you like to learn?</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Quantum Physics, Spanish Grammar, Machine Learning..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit()}
+                  className="w-full px-4 py-3.5 bg-background border-2 border-input rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                />
+              </div>
+              <button
+                onClick={handleSearchSubmit}
+                disabled={!searchQuery.trim()}
+                className="w-full bg-primary hover:bg-primary-hover text-primary-foreground font-bold py-3.5 px-4 rounded-xl transition-all duration-200 elevation-1 hover:elevation-2 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm"
+              >
+                🚀 Generate Learning Path
+              </button>
             </div>
-          </label>
+          )}
 
-          <button
-            type="submit"
-            disabled={!file}
-            className="w-full bg-primary hover:bg-primary-hover text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            aria-label="Analyze document"
-          >
-            Analyze Document
-          </button>
-        </form>
+          {/* YouTube Tab */}
+          {activeTab === 'youtube' && (
+            <div className="space-y-5 animate-in fade-in duration-300">
+              <div>
+                <label className="flex items-center space-x-2 text-sm font-semibold text-foreground mb-3">
+                  <Youtube className="w-4 h-4 text-secondary" />
+                  <span>Paste YouTube URL</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://youtube.com/watch?v=..."
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleYouTubeSubmit()}
+                  className="w-full px-4 py-3.5 bg-background border-2 border-input rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-secondary focus:ring-4 focus:ring-secondary/10 transition-all"
+                />
+              </div>
+              <button
+                onClick={handleYouTubeSubmit}
+                disabled={!youtubeUrl.trim()}
+                className="w-full bg-secondary hover:bg-secondary-hover text-secondary-foreground font-bold py-3.5 px-4 rounded-xl transition-all duration-200 elevation-1 hover:elevation-2 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm"
+              >
+                📺 Generate from Video
+              </button>
+            </div>
+          )}
+
+          {/* Upload Tab */}
+          {activeTab === 'upload' && (
+            <div className="space-y-5 animate-in fade-in duration-300">
+              <div>
+                <label className="flex items-center space-x-2 text-sm font-semibold text-foreground mb-3">
+                  <Upload className="w-4 h-4 text-accent" />
+                  <span>Upload Your Document</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx,.txt"
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-input rounded-xl cursor-pointer bg-muted/30 hover:bg-muted/50 hover:border-accent transition-all duration-200"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-3">
+                      <Upload className="w-6 h-6 text-accent" />
+                    </div>
+                    <span className="text-sm font-semibold text-foreground mb-1">Click to upload</span>
+                    <span className="text-xs text-muted-foreground">PDF, DOC, DOCX, or TXT • Max 20MB</span>
+                  </label>
+                </div>
+                {selectedFile && (
+                  <div className="flex items-center justify-between p-4 bg-accent/5 border border-accent/20 rounded-xl mt-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-accent" />
+                      </div>
+                      <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{selectedFile.name}</span>
+                    </div>
+                    <button
+                      onClick={() => setSelectedFile(null)}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handleFileSubmit}
+                disabled={!selectedFile}
+                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold py-3.5 px-4 rounded-xl transition-all duration-200 elevation-1 hover:elevation-2 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm"
+              >
+                📄 Generate from Document
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Feature Grid */}
+      <div className="max-w-4xl mx-auto mt-16 grid sm:grid-cols-3 gap-6">
+        {[
+          { icon: BookOpen, title: "Structured Chapters", desc: "Organized, bite-sized learning modules", color: "primary" },
+          { icon: Brain, title: "Smart Quizzes", desc: "AI-generated practice questions", color: "secondary" },
+          { icon: Layers, title: "Interactive Flashcards", desc: "Master key concepts with spaced repetition", color: "accent" }
+        ].map((feature, i) => {
+          const Icon = feature.icon;
+          return (
+            <div key={i} className="bg-card border border-border rounded-xl p-6 text-center elevation-1 hover:elevation-2 transition-all duration-200 hover:border-primary/30">
+              <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl bg-${feature.color}/10 mb-4`}>
+                <Icon className={`w-7 h-7 text-${feature.color}`} />
+              </div>
+              <h3 className="font-bold text-foreground mb-2 text-base">{feature.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

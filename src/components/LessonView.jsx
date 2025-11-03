@@ -18,14 +18,14 @@ const LessonView = ({ lessonData, setLessonData }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
       <button
         onClick={handleBack}
-        className="group inline-flex items-center space-x-1.5 px-3 py-2 bg-card border border-border rounded-lg mb-6 hover:border-primary hover:bg-primary/5 transition-all duration-200 text-sm font-semibold"
+        className="group inline-flex items-center space-x-2 px-4 py-2.5 bg-card border-2 border-border rounded-xl mb-8 hover:border-primary hover:bg-primary/5 transition-all duration-200 text-sm font-bold elevation-1 hover:elevation-2"
         aria-label={selectedMode ? "Back to learning modes" : "Back to home"}
       >
         <ArrowLeft className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-        <span className="text-foreground">{selectedMode ? "Back to Modes" : "Back to Home"}</span>
+        <span className="text-foreground">{selectedMode ? "← Modes" : "← Home"}</span>
       </button>
 
       <div className="animate-in fade-in duration-500">

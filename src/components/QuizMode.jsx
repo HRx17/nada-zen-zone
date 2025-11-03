@@ -56,8 +56,8 @@ const QuizMode = ({ lessonData }) => {
 
   if (quiz.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-xl p-8 elevation-1 text-center">
-        <p className="text-base text-muted-foreground">No quiz questions available for this lesson.</p>
+      <div className="bg-card border-2 border-border rounded-2xl p-12 elevation-2 text-center">
+        <p className="text-lg text-muted-foreground">No quiz questions available for this lesson.</p>
       </div>
     );
   }
@@ -68,27 +68,27 @@ const QuizMode = ({ lessonData }) => {
     const isGood = percentage >= 70;
 
     return (
-      <div className="bg-card border border-border rounded-2xl p-8 sm:p-12 elevation-2 text-center space-y-8">
-        <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${
+      <div className="bg-card border-2 border-border rounded-2xl p-10 sm:p-14 elevation-3 text-center space-y-8 max-w-3xl mx-auto">
+        <div className={`inline-flex items-center justify-center w-28 h-28 rounded-full ${
           isPerfect ? "bg-success/10" : isGood ? "bg-primary/10" : "bg-secondary/10"
-        } mb-4`}>
+        } elevation-2`}>
           {isPerfect ? (
-            <Trophy className="w-14 h-14 text-success" />
+            <Trophy className="w-16 h-16 text-success" />
           ) : (
-            <Award className="w-14 h-14 text-primary" />
+            <Award className="w-16 h-16 text-primary" />
           )}
         </div>
         
         <div>
-          <h2 className="text-4xl sm:text-5xl font-black text-foreground mb-4">Quiz Complete!</h2>
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-foreground mb-4">Quiz Complete!</h2>
           <div className="text-6xl sm:text-7xl font-black text-primary my-6">
             {score}/{quiz.length}
           </div>
-          <p className="text-xl sm:text-2xl text-muted-foreground">
+          <p className="text-xl sm:text-2xl text-muted-foreground font-semibold">
             You scored {percentage}%
           </p>
           {isPerfect && (
-            <p className="text-success font-semibold mt-2">Perfect Score! 🎉</p>
+            <p className="text-success font-bold mt-3 text-lg">Perfect Score! 🎉</p>
           )}
         </div>
         

@@ -44,8 +44,8 @@ const FlashcardsMode = ({ lessonData }) => {
 
   if (cards.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-2xl p-12 elevation-2 text-center">
-        <p className="text-lg text-muted-foreground">No flashcards available for this lesson.</p>
+      <div className="bg-card border-2 border-border rounded-2xl p-14 elevation-3 text-center max-w-2xl mx-auto">
+        <p className="text-lg text-muted-foreground font-medium">No flashcards available for this lesson.</p>
       </div>
     );
   }
@@ -53,9 +53,9 @@ const FlashcardsMode = ({ lessonData }) => {
   const progress = Math.round((studiedCards.size / cards.length) * 100);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6 max-w-3xl mx-auto">
       {/* Progress Section */}
-      <div className="bg-card border border-border rounded-xl p-5 elevation-1">
+      <div className="bg-card border-2 border-border rounded-2xl p-6 elevation-2">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-bold text-muted-foreground">
             Card {currentCard + 1} of {cards.length}
