@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Mic, MicOff, Send, Bot, User } from "lucide-react";
+import { Mic, MicOff, Send, Bot, User, Volume2 } from "lucide-react";
 
 const TutorMode = ({ lessonData }) => {
   const [messages, setMessages] = useState([]);
@@ -157,20 +157,20 @@ const TutorMode = ({ lessonData }) => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-280px)]">
+    <div className="flex flex-col h-[calc(100vh-280px)] bg-card border border-border rounded-2xl elevation-2 overflow-hidden">
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-6 glass rounded-t-3xl elevation-2 border border-b-0 border-border/50">
+      <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
         {messages.map((msg, index) => (
           <div
             key={index}
             className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} animate-in fade-in duration-500`}
           >
-            <div className={`flex items-start space-x-3 max-w-[80%] ${msg.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
+            <div className={`flex items-start space-x-3 max-w-[85%] sm:max-w-[75%] ${msg.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
               {/* Avatar */}
               <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center elevation-1 ${
                 msg.sender === "user"
-                  ? "bg-gradient-to-br from-primary to-primary-glow"
-                  : "bg-gradient-to-br from-accent to-accent"
+                  ? "bg-primary"
+                  : "bg-accent"
               }`}>
                 {msg.sender === "user" ? (
                   <User className="w-5 h-5 text-white" />
@@ -181,13 +181,13 @@ const TutorMode = ({ lessonData }) => {
               
               {/* Message Bubble */}
               <div
-                className={`px-6 py-4 rounded-2xl elevation-1 ${
+                className={`px-5 py-4 rounded-2xl elevation-1 ${
                   msg.sender === "user"
-                    ? "bg-gradient-to-br from-primary to-primary-glow text-white rounded-tr-sm"
-                    : "glass border border-border/50 text-foreground rounded-tl-sm"
+                    ? "bg-primary text-white rounded-tr-sm"
+                    : "bg-muted text-foreground border border-border rounded-tl-sm"
                 }`}
               >
-                <p className="text-base leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                <p className="text-base leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
               </div>
             </div>
           </div>
@@ -195,18 +195,19 @@ const TutorMode = ({ lessonData }) => {
         
         {isTutorSpeaking && !isSending && (
           <div className="flex justify-start animate-in fade-in duration-500">
-            <div className="flex items-start space-x-3 max-w-[80%]">
-              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent flex items-center justify-center elevation-1">
+            <div className="flex items-start space-x-3 max-w-[75%]">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-accent flex items-center justify-center elevation-1">
                 <Bot className="w-5 h-5 text-white" />
               </div>
-              <div className="glass border border-border/50 px-6 py-4 rounded-2xl rounded-tl-sm elevation-1">
+              <div className="bg-muted border border-border px-5 py-4 rounded-2xl rounded-tl-sm elevation-1">
                 <div className="flex items-center space-x-2">
+                  <Volume2 className="w-4 h-4 text-accent animate-pulse" />
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
                     <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
                     <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
                   </div>
-                  <p className="text-sm italic text-muted-foreground">Speaking...</p>
+                  <p className="text-sm italic text-muted-foreground ml-2">Speaking...</p>
                 </div>
               </div>
             </div>
@@ -216,46 +217,63 @@ const TutorMode = ({ lessonData }) => {
       </div>
 
       {/* Input Area */}
-      <div className="glass p-6 rounded-b-3xl elevation-2 border border-t-0 border-border/50">
+      <div className="border-t border-border p-4 sm:p-6 bg-card">
         <div className="flex items-end space-x-3">
           <button
             onClick={handleMicClick}
             disabled={isTutorSpeaking || isSending}
-            className={`flex-shrink-0 p-4 rounded-xl transition-all elevation-1 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`flex-shrink-0 p-3 sm:p-4 rounded-xl transition-all elevation-1 disabled:opacity-50 disabled:cursor-not-allowed ${
               isListening
-                ? "bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse glow"
-                : "bg-gradient-to-r from-secondary to-secondary text-white hover:scale-110"
+                ? "bg-destructive text-white animate-pulse"
+                : "bg-secondary hover:bg-secondary-hover text-white hover:scale-110 active:scale-95"
             }`}
             title={isListening ? "Stop recording" : "Start voice input"}
+            aria-label={isListening ? "Stop recording" : "Start voice input"}
           >
-            {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+            {isListening ? <MicOff className="w-5 h-5 sm:w-6 sm:h-6" /> : <Mic className="w-5 h-5 sm:w-6 sm:h-6" />}
           </button>
 
-          <div className="flex-1 glass rounded-xl border border-border/50 focus-within:border-primary focus-within:glow transition-all">
+          <div className="flex-1 bg-muted rounded-xl border border-input focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message or use voice input..."
               disabled={isTutorSpeaking || isSending}
-              className="w-full p-4 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none resize-none"
+              className="w-full p-3 sm:p-4 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none resize-none"
               rows={2}
+              aria-label="Message input"
             />
           </div>
 
           <button
             onClick={handleSendClick}
             disabled={!inputText.trim() || isTutorSpeaking || isSending}
-            className="flex-shrink-0 p-4 rounded-xl bg-gradient-to-r from-primary to-primary-glow text-white transition-all elevation-1 hover:scale-110 hover:glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="flex-shrink-0 p-3 sm:p-4 rounded-xl bg-primary hover:bg-primary-hover text-white transition-all elevation-1 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             title="Send message"
+            aria-label="Send message"
           >
-            <Send className="w-6 h-6" />
+            <Send className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
-        <p className="text-xs text-muted-foreground mt-4 text-center">
-          {isListening ? "🎤 Listening... Speak now" : isTutorSpeaking ? "⏳ Waiting for Lumi..." : "💡 Press Enter to send, Shift+Enter for new line"}
-        </p>
+        <div className="flex items-center justify-center mt-3 sm:mt-4">
+          {isListening ? (
+            <div className="flex items-center space-x-2 text-destructive">
+              <div className="w-2 h-2 bg-destructive rounded-full animate-pulse"></div>
+              <p className="text-xs font-semibold">Listening... Speak now</p>
+            </div>
+          ) : isTutorSpeaking ? (
+            <div className="flex items-center space-x-2 text-muted-foreground">
+              <Volume2 className="w-4 h-4 text-accent" />
+              <p className="text-xs font-semibold">Waiting for Lumi to finish...</p>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              💡 Press <span className="font-semibold">Enter</span> to send, <span className="font-semibold">Shift+Enter</span> for new line
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

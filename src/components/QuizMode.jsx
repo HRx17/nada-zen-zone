@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CheckCircle2, XCircle, RotateCcw, Trophy, Sparkles } from "lucide-react";
+import { CheckCircle2, XCircle, RotateCcw, Trophy, Award } from "lucide-react";
 
 const QuizMode = ({ lessonData }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -56,7 +56,7 @@ const QuizMode = ({ lessonData }) => {
 
   if (quiz.length === 0) {
     return (
-      <div className="glass rounded-3xl p-16 elevation-2 border border-border/50 text-center">
+      <div className="bg-card border border-border rounded-2xl p-12 elevation-2 text-center">
         <p className="text-lg text-muted-foreground">No quiz questions available for this lesson.</p>
       </div>
     );
@@ -64,21 +64,32 @@ const QuizMode = ({ lessonData }) => {
 
   if (quizCompleted) {
     const percentage = Math.round((score / quiz.length) * 100);
+    const isPerfect = percentage === 100;
+    const isGood = percentage >= 70;
+
     return (
-      <div className="glass rounded-3xl p-12 elevation-2 border border-border/50 text-center space-y-8">
-        <div className="relative inline-block">
-          <div className="absolute inset-0 bg-accent/20 rounded-full blur-3xl animate-pulse-glow"></div>
-          <Trophy className="relative w-24 h-24 text-accent mx-auto animate-float" />
+      <div className="bg-card border border-border rounded-2xl p-8 sm:p-12 elevation-2 text-center space-y-8">
+        <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${
+          isPerfect ? "bg-success/10" : isGood ? "bg-primary/10" : "bg-secondary/10"
+        } mb-4`}>
+          {isPerfect ? (
+            <Trophy className="w-14 h-14 text-success" />
+          ) : (
+            <Award className="w-14 h-14 text-primary" />
+          )}
         </div>
         
         <div>
-          <h2 className="text-5xl font-black text-foreground mb-4">Quiz Complete!</h2>
-          <div className="text-7xl font-black gradient-text my-6">
+          <h2 className="text-4xl sm:text-5xl font-black text-foreground mb-4">Quiz Complete!</h2>
+          <div className="text-6xl sm:text-7xl font-black text-primary my-6">
             {score}/{quiz.length}
           </div>
-          <p className="text-2xl text-muted-foreground">
+          <p className="text-xl sm:text-2xl text-muted-foreground">
             You scored {percentage}%
           </p>
+          {isPerfect && (
+            <p className="text-success font-semibold mt-2">Perfect Score! 🎉</p>
+          )}
         </div>
         
         {/* Results Summary */}
@@ -87,24 +98,28 @@ const QuizMode = ({ lessonData }) => {
           {answeredQuestions.map((item, index) => (
             <div
               key={index}
-              className={`p-6 rounded-2xl text-left glass border-2 elevation-1 ${
-                item.isCorrect ? "border-green-500/30 bg-green-500/5" : "border-red-500/30 bg-red-500/5"
+              className={`p-5 rounded-xl text-left border-2 elevation-1 ${
+                item.isCorrect 
+                  ? "border-success/30 bg-success/5" 
+                  : "border-destructive/30 bg-destructive/5"
               }`}
             >
               <div className="flex items-start space-x-4">
                 {item.isCorrect ? (
-                  <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
+                  <CheckCircle2 className="w-6 h-6 text-success flex-shrink-0 mt-1" />
                 ) : (
-                  <XCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
+                  <XCircle className="w-6 h-6 text-destructive flex-shrink-0 mt-1" />
                 )}
-                <div className="flex-1">
-                  <p className="font-semibold text-foreground mb-3 text-lg">{item.question}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground mb-3 text-base">{item.question}</p>
                   <p className="text-sm text-muted-foreground mb-1">
-                    Your answer: <span className={item.isCorrect ? "text-green-500 font-semibold" : "text-red-500 font-semibold"}>{item.selectedAnswer}</span>
+                    Your answer: <span className={`font-semibold ${item.isCorrect ? "text-success" : "text-destructive"}`}>
+                      {item.selectedAnswer}
+                    </span>
                   </p>
                   {!item.isCorrect && (
                     <p className="text-sm text-muted-foreground">
-                      Correct answer: <span className="text-green-500 font-semibold">{item.correctAnswer}</span>
+                      Correct answer: <span className="text-success font-semibold">{item.correctAnswer}</span>
                     </p>
                   )}
                 </div>
@@ -115,9 +130,10 @@ const QuizMode = ({ lessonData }) => {
 
         <button
           onClick={handleRestartQuiz}
-          className="bg-gradient-to-r from-primary to-primary-glow text-white font-bold px-10 py-5 rounded-2xl transition-all duration-300 hover:scale-105 elevation-2 hover:glow flex items-center justify-center space-x-3 mx-auto"
+          className="bg-primary hover:bg-primary-hover text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 elevation-1 flex items-center justify-center space-x-2 mx-auto"
+          aria-label="Retry quiz"
         >
-          <RotateCcw className="w-6 h-6" />
+          <RotateCcw className="w-5 h-5" />
           <span>Retry Quiz</span>
         </button>
       </div>
@@ -125,39 +141,39 @@ const QuizMode = ({ lessonData }) => {
   }
 
   const question = quiz[currentQuestion];
+  const progress = ((currentQuestion + 1) / quiz.length) * 100;
 
   return (
     <div className="space-y-6">
       {/* Progress Bar */}
-      <div className="glass rounded-2xl p-6 elevation-2 border border-border/50">
+      <div className="bg-card border border-border rounded-xl p-6 elevation-2">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+          <span className="text-sm font-bold text-muted-foreground">
             Question {currentQuestion + 1} of {quiz.length}
           </span>
           <span className="text-sm font-bold text-primary">
             Score: {score}/{quiz.length}
           </span>
         </div>
-        <div className="relative w-full bg-background/50 rounded-full h-3 overflow-hidden">
+        <div className="relative w-full bg-muted rounded-full h-3 overflow-hidden">
           <div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-primary-glow rounded-full transition-all duration-500 elevation-1"
-            style={{ width: `${((currentQuestion + 1) / quiz.length) * 100}%` }}
+            className="absolute inset-y-0 left-0 bg-primary rounded-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin="0"
+            aria-valuemax="100"
           />
         </div>
       </div>
 
       {/* Question Card */}
-      <div className="glass rounded-3xl p-10 elevation-2 border border-border/50">
-        <div className="flex items-start space-x-4 mb-10">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-secondary to-secondary">
-            <Sparkles className="w-6 h-6 text-white" />
-          </div>
-          <h2 className="text-3xl font-bold text-foreground leading-tight">
-            {question.question}
-          </h2>
-        </div>
+      <div className="bg-card border border-border rounded-2xl p-8 sm:p-10 elevation-2">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8 leading-tight">
+          {question.question}
+        </h2>
 
-        <div className="space-y-4">
+        <div className="space-y-4" role="radiogroup" aria-label="Answer options">
           {question.options?.map((option, index) => {
             const isSelected = selectedAnswer === option;
             const isCorrect = option === question.answer;
@@ -169,23 +185,26 @@ const QuizMode = ({ lessonData }) => {
                 key={index}
                 onClick={() => handleAnswerSelect(option)}
                 disabled={showResult}
-                className={`w-full p-6 rounded-2xl text-left transition-all duration-300 border-2 elevation-1 hover:elevation-2 ${
+                className={`w-full p-5 rounded-xl text-left transition-all duration-200 border-2 ${
                   showCorrectAnswer
-                    ? "bg-green-500/10 border-green-500 text-foreground"
+                    ? "bg-success/10 border-success text-foreground"
                     : showWrongAnswer
-                    ? "bg-red-500/10 border-red-500 text-foreground"
+                    ? "bg-destructive/10 border-destructive text-foreground"
                     : isSelected
-                    ? "bg-primary/10 border-primary text-foreground scale-[1.02]"
-                    : "glass border-border/50 hover:border-primary/50 text-foreground"
-                } ${showResult ? "cursor-not-allowed" : "cursor-pointer hover:scale-[1.01]"}`}
+                    ? "bg-primary/10 border-primary text-foreground elevation-1"
+                    : "bg-muted border-transparent hover:border-primary hover:bg-card"
+                } ${showResult ? "cursor-not-allowed" : "cursor-pointer"}`}
+                role="radio"
+                aria-checked={isSelected}
+                aria-label={option}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-lg">{option}</span>
+                  <span className="font-semibold text-base pr-4">{option}</span>
                   {showResult && isCorrect && (
-                    <CheckCircle2 className="w-7 h-7 text-green-500 flex-shrink-0" />
+                    <CheckCircle2 className="w-6 h-6 text-success flex-shrink-0" />
                   )}
                   {showResult && isSelected && !isCorrect && (
-                    <XCircle className="w-7 h-7 text-red-500 flex-shrink-0" />
+                    <XCircle className="w-6 h-6 text-destructive flex-shrink-0" />
                   )}
                 </div>
               </button>
@@ -194,19 +213,21 @@ const QuizMode = ({ lessonData }) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-10 flex items-center justify-end">
+        <div className="mt-8 flex items-center justify-end">
           {!showResult ? (
             <button
               onClick={handleSubmitAnswer}
               disabled={!selectedAnswer}
-              className="bg-gradient-to-r from-primary to-primary-glow text-white font-bold px-10 py-4 rounded-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 elevation-2 hover:glow"
+              className="bg-primary hover:bg-primary-hover text-white font-bold px-8 py-3 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 elevation-1"
+              aria-label="Submit answer"
             >
               Submit Answer
             </button>
           ) : (
             <button
               onClick={handleNextQuestion}
-              className="bg-gradient-to-r from-primary to-primary-glow text-white font-bold px-10 py-4 rounded-2xl transition-all duration-300 hover:scale-105 elevation-2 hover:glow"
+              className="bg-primary hover:bg-primary-hover text-white font-bold px-8 py-3 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 elevation-1"
+              aria-label={currentQuestion < quiz.length - 1 ? "Next question" : "Finish quiz"}
             >
               {currentQuestion < quiz.length - 1 ? "Next Question" : "Finish Quiz"}
             </button>
